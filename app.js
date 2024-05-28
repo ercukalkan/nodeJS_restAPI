@@ -1,7 +1,10 @@
 const express = require('express');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const feedRoutes = require('./routes/feed');
-const bodyParser = require('body-parser');
+
+const URI = 'mongodb+srv://sa:123@mongodbpractice123.zxtp6fe.mongodb.net/shopDatabase987?w=majority&appName=mongoDBPractice123'
 
 const app = express();
 
@@ -16,6 +19,9 @@ app.use((req, res, next) => {
 
 app.use('/feed', feedRoutes);
 
-app.listen(8080, () => {
-    console.log('listening on 8080');
-});
+async function main() {
+    app.listen(8080);
+    await mongoose.connect(URI);
+}
+
+main().catch(err => console.log(err));
