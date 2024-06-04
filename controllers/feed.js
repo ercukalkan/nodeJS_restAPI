@@ -1,4 +1,5 @@
 const { validationResult } = require('express-validator');
+const Post = require('../models/post');
 
 exports.getPosts = (req, res, next) => {
     res.status(200).json({
@@ -17,29 +18,39 @@ exports.getPosts = (req, res, next) => {
     });
 }
 
-exports.addPost = (req, res, next) => {
+exports.addPost = async (req, res, next) => {
     const validationErrors = validationResult(req);
 
-    if (validationErrors.isEmpty()) {
-        return res.status(422).json({
-            message: 'validation failed, the data you entered is incorrect',
-            errors: validationErrors.array()
-        })
+    if (!validationErrors.isEmpty()) {
+        const error = new Error('validation failed, the data you entered is incorrect');
+        error.statusCode = 422;
+        throw error;
     }
 
     const title = req.body.title;
     const content = req.body.content;
 
-    res.status(201).json({
-        message: 'Post created successfully',
-        post: {
-            _id: new Date().toISOString(),
-            title: title,
-            content: content,
-            creator: {
-                name: 'ercu'
-            },
-            createdAt: new Date()
+    const post = new Post({
+        title: title,
+        content: content,
+        imageUrl: 'images/item.jpeg',
+        creator: {
+            name: 'ercu'
         }
     });
+
+    try {
+        const saveResult = await post.save();
+        console.log(saveResult);
+
+        res.status(201).json({
+            message: 'Post created successfully',
+            post: saveResult
+        });
+    } catch (err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
 }
