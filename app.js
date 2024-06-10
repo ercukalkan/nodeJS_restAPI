@@ -2,6 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const path = require('path');
+const multer = require('multer');
+const { v4: uuidv4 } = require('uuid');
 
 const feedRoutes = require('./routes/feed');
 
@@ -9,7 +11,29 @@ const URI = 'mongodb+srv://sa:123@mongodbpractice123.zxtp6fe.mongodb.net/shopDat
 
 const app = express();
 
+const fileStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'images');
+    },
+    filename: function (req, file, cb) {
+        console.log(file);
+        cb(null, uuidv4() + '-' + file.originalname);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype === 'image/png' ||
+        file.mimetype === 'image/jpg' ||
+        file.mimetype === 'image/jpeg'
+    ) {
+        cb(null, true);
+    } else {
+        cb(null, false);
+    }
+}
+
 app.use(bodyParser.json());
+app.use(multer({ storage: fileStorage, fileFilter: fileFilter }).single('image'));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use((req, res, next) => {
