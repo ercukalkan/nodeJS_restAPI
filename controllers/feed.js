@@ -1,21 +1,24 @@
 const { validationResult } = require('express-validator');
 const Post = require('../models/post');
 
-exports.getPosts = (req, res, next) => {
-    res.status(200).json({
-        posts: [
-            {
-                _id: '1',
-                title: 'first post',
-                content: 'this is the first post!',
-                imageUrl: 'images/item.jpeg',
-                creator: {
-                    name: 'ercu'
-                },
-                createdAt: new Date()
-            }
-        ]
-    });
+exports.getPosts = async (req, res, next) => {
+    try {
+        const posts = await Post.find();
+
+        if (posts) {
+            res
+                .status(200)
+                .json({
+                    message: 'posts have been retrieved successfully',
+                    posts: posts
+                });
+        }
+    } catch (err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
 }
 
 exports.addPost = async (req, res, next) => {
@@ -47,6 +50,28 @@ exports.addPost = async (req, res, next) => {
             message: 'Post created successfully',
             post: saveResult
         });
+    } catch (err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+}
+
+exports.getPost = async (req, res, next) => {
+    const postId = req.params.postId;
+
+    try {
+        const post = await Post.findById(postId);
+
+        if (post) {
+            res
+                .status(200)
+                .json({
+                    message: 'post has been retrieved successfully',
+                    post: post
+                });
+        }
     } catch (err) {
         if (!err.statusCode) {
             err.statusCode = 500;
