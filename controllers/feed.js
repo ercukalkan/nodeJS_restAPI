@@ -196,6 +196,12 @@ exports.deletePost = async (req, res, next) => {
 
         const removedPost = await Post.findByIdAndDelete(postId);
 
+        const user = await User.findById(req.userId);
+
+        await user.posts.pull(postId);
+
+        const savedUser = await user.save();
+
         res.status(200).json({
             message: 'deleted post successfully'
         });
