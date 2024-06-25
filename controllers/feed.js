@@ -143,7 +143,7 @@ exports.updatePost = async (req, res, next) => {
             throw error;
         }
 
-        const post = await Post.findById(postId);
+        const post = await Post.findById(postId).populate('creator');
 
         if (!post) {
             const error = new Error('could not find post');
@@ -151,7 +151,7 @@ exports.updatePost = async (req, res, next) => {
             throw error;
         }
 
-        if (post.creator.toString() !== req.userId) {
+        if (post.creator._id.toString() !== req.userId) {
             const error = new Error('not authorized');
             error.statusCode = 403;
             throw error;
@@ -166,6 +166,11 @@ exports.updatePost = async (req, res, next) => {
         post.content = content;
 
         const savedPost = await post.save();
+
+        customIO.getIO().emit('posts456', {
+            action789: 'update',
+            post123: savedPost
+        });
 
         res
             .status(200)
