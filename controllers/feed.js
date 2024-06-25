@@ -3,6 +3,7 @@ const Post = require('../models/post');
 const fs = require('fs');
 const path = require('path');
 const User = require('../models/user');
+const customIO = require('../socket');
 
 exports.getPosts = async (req, res, next) => {
     try {
@@ -12,6 +13,9 @@ exports.getPosts = async (req, res, next) => {
         let totalItems = await Post.find().countDocuments();
         const posts = await Post.find()
             .populate('creator')
+            .sort({
+                createdAt: -1
+            })
             .skip((currentPage - 1) * perPage)
             .limit(perPage);
 
@@ -69,6 +73,11 @@ exports.addPost = async (req, res, next) => {
         creator = addedUser;
 
         const savedUser = await addedUser.save();
+
+        customIO.getIO().emit('posts456', {
+            action789: 'create',
+            post123: post
+        });
 
         res.status(201).json({
             message: 'Post created successfully',
@@ -137,7 +146,7 @@ exports.updatePost = async (req, res, next) => {
             throw error;
         }
 
-        const post = await Post.findById(postId);
+        const post = await Post.findById(postId).populate('creator');
 
         if (!post) {
             const error = new Error('could not find post');
@@ -145,7 +154,7 @@ exports.updatePost = async (req, res, next) => {
             throw error;
         }
 
-        if (post.creator.toString() !== req.userId) {
+        if (post.creator._id.toString() !== req.userId) {
             const error = new Error('not authorized');
             error.statusCode = 403;
             throw error;
@@ -160,6 +169,11 @@ exports.updatePost = async (req, res, next) => {
         post.content = content;
 
         const savedPost = await post.save();
+
+        customIO.getIO().emit('posts456', {
+            action789: 'update',
+            post123: savedPost
+        });
 
         res
             .status(200)
@@ -202,6 +216,11 @@ exports.deletePost = async (req, res, next) => {
         await user.posts.pull(postId);
 
         const savedUser = await user.save();
+
+        customIO.getIO().emit('posts456', {
+            action789: 'delete',
+            post123: postId
+        });
 
         res.status(200).json({
             message: 'deleted post successfully'
