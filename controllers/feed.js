@@ -217,6 +217,11 @@ exports.deletePost = async (req, res, next) => {
 
         const savedUser = await user.save();
 
+        customIO.getIO().emit('posts456', {
+            action789: 'delete',
+            post123: postId
+        });
+
         res.status(200).json({
             message: 'deleted post successfully'
         });
