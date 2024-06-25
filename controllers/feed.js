@@ -3,6 +3,7 @@ const Post = require('../models/post');
 const fs = require('fs');
 const path = require('path');
 const User = require('../models/user');
+const customIO = require('../socket');
 
 exports.getPosts = async (req, res, next) => {
     try {
@@ -69,6 +70,11 @@ exports.addPost = async (req, res, next) => {
         creator = addedUser;
 
         const savedUser = await addedUser.save();
+
+        customIO.getIO().emit('posts456', {
+            action789: 'create',
+            post123: post
+        });
 
         res.status(201).json({
             message: 'Post created successfully',
