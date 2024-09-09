@@ -77,11 +77,13 @@ exports.login = (req, res, next) => {
                     token: token,
                     userId: loadedUser._id.toString()
                 });
+            return;
         })
         .catch(err => {
             if (!err.statusCode) {
                 err.statusCode = 500;
             }
             next(err);
+            return err;
         })
 }
